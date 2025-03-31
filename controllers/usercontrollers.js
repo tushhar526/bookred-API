@@ -317,6 +317,52 @@ const changeEmail = async (req, res) => {
     }
 };
 
+const AddToCurrentlyReading = async (req, res) => {
+    const { userID } = req.params;
+    const { bookID, completionDate } = req.body;
+
+    try {
+        const user = User.findOne(userID);
+
+        user.currentlyReading = {
+            book: bookID,
+            completionDate: completionDate ? new Date(completionDate) : new Date(new Date().setDate(new Date().getDate() + 1))
+        }
+
+        await user.save();
+
+        return res.status(200).json({ message: "Book Added to Currently Reading", val: true })
+    }
+    catch (error) {
+        console.error("Error occured while adding the currently reading book = ", error),
+            res.status(500).json({ message: "Error occured in Adding currently reading book", error: error })
+    }
+}
+
+const GetCurrentlyReadingBook = async (req, res) => {
+    const userID = req.params;
+    try {
+        const user = User.findOne(userID).
+            populate({
+                path: "currentlyReading.book",
+                populate: {
+                    path: "writer.author",
+                    select: "name"
+                },
+                select: "bookname writer image"
+            });
+
+        const book = user.currentlyReading.book;
+        const date = user.currentlyReading.completionDate;
+
+        return res.status(200).json({ currentlyReading: book, completionDate: date })
+    }
+    catch (error) {
+        console.error("Error Occured while getting currently reading book = ", error);
+        res.status(500).json({ message: "Error occured in getting currently reading book", error: error })
+    }
+}
+
 
 module.exports = {
     getreadbooks,
@@ -331,4 +377,6 @@ module.exports = {
     getbookmarkedbooks,
     deleteProfilePicture,
     uploadProfilePic,
+    AddToCurrentlyReading,
+    GetCurrentlyReadingBook
 }

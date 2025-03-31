@@ -54,8 +54,13 @@ const userSchema = new mongoose.Schema({
         },
     ],
     currentlyReading: {
-        type: Schema.Types.ObjectId,
-        ref: "books",
+        book: {
+            type: Schema.Types.ObjectId,
+            ref: "books"
+        },
+        completionDate: {
+            type: Date
+        }
     },
     followedauthors: [
         {

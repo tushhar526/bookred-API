@@ -13,7 +13,9 @@ router.get('/bookmark/:userID', userController.getbookmarkedbooks);
 
 router.get('/readbook/:userID', userController.getreadbooks);
 
-router.get('/followedAuthor/:userID',userController.getFollowedAuthor);
+router.get('/followedAuthor/:userID', userController.getFollowedAuthor);
+
+router.get("/currentlyReading/userID", userController.GetCurrentlyReadingBook);
 
 
 //Put URL
@@ -26,9 +28,11 @@ router.put("/updateEmail/:userId", userController.changeEmail);
 
 router.post("/upload/:userID", upload.single('profile_pic'), userController.uploadProfilePic);
 
+router.post("/currentlyReading/:userID", userController.AddToCurrentlyReading);
+
 
 //Delete URLs
 
-router.delete("/removePFP/:userID",userController.deleteProfilePicture);
+router.delete("/removePFP/:userID", userController.deleteProfilePicture);
 
 module.exports = router
