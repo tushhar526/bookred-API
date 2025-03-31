@@ -242,23 +242,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-// //forgot Password
-// const forgotPassword = async (req, res) => {
-//   const { email, phoneNumber } = req.body;
-
-//   try {
-
-//     const user = await User.findOne({
-//       $or: [{ email }, { phoneNumber }]
-//     });
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found with provided email or phone number" });
-//     }
-
-//     const resetCode = user.getResetPasswordCode();
-
-//     await user.save(); // Save user with updated resetPasswordToken and resetPasswordExpire
 module.exports = {
   loginUser,
   signinuser,
