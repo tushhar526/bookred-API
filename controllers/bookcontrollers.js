@@ -151,59 +151,59 @@ const addBook = async (req, res) => {
 //   }
 // };
 
-// const getBookByIdWithUserStatus = async (req, res) => {
-//   const { bookID, userID } = req.body;
+const getBookByIdWithUserStatus = async (req, res) => {
+  const { bookID, userID } = req.body;
 
-//   if (!bookID || !userID) {
-//     return res.status(400).json({ message: "Both bookID and userID are required" });
-//   }
+  if (!bookID || !userID) {
+    return res.status(400).json({ message: "Both bookID and userID are required" });
+  }
 
-//   try {
-//     const [user, book] = await Promise.all([
-//       User.findById(userID),
-//       Book.findById(bookID)
-//         .populate({
-//           path: 'writer.author', // Populate the author inside writer
-//           select: 'name role'    // Select only name and role fields
-//         })
-//         .lean()
-//     ]);
+  try {
+    const [user, book] = await Promise.all([
+      User.findById(userID),
+      Book.findById(bookID)
+        .populate({
+          path: 'writer.author', // Populate the author inside writer
+          select: 'name role'    // Select only name and role fields
+        })
+        .lean()
+    ]);
 
-//     if (!user) return res.status(404).json({ message: "User not found" });
-//     if (!book) return res.status(404).json({ message: "Book not found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!book) return res.status(404).json({ message: "Book not found" });
 
-//     const isLiked = user.likedbooks.includes(bookID);
-//     const isDisliked = user.dislikedbooks?.includes(bookID) ?? false;
+    const isLiked = user.likedbooks.includes(bookID);
+    const isDisliked = user.dislikedbooks?.includes(bookID) ?? false;
 
-//     // Ensure 'dislike' and 'like' fields exist in the book object
-//     const likeCount = book.like ?? 0;
-//     const dislikeCount = book.dislike ?? 0;
+    // Ensure 'dislike' and 'like' fields exist in the book object
+    const likeCount = book.like ?? 0;
+    const dislikeCount = book.dislike ?? 0;
 
-//     // Transform the book data to include an 'authors' field like in getBookapp
-//     const authors = book.writer?.filter(writer => writer.role === 'Author' && writer.author?.name)
-//       .map(writer => ({
-//         name: writer.author.name,
-//         role: writer.role
-//       })) ?? [];
+    // Transform the book data to include an 'authors' field like in getBookapp
+    const authors = book.writer?.filter(writer => writer.role === 'Author' && writer.author?.name)
+      .map(writer => ({
+        name: writer.author.name,
+        role: writer.role
+      })) ?? [];
 
-//     const transformedBook = {
-//       ...book,
-//       like: likeCount,
-//       dislike: dislikeCount,
-//       authors // Add authors to the response
-//     };
+    const transformedBook = {
+      ...book,
+      like: likeCount,
+      dislike: dislikeCount,
+      authors // Add authors to the response
+    };
 
-//     return res.status(200).json({
-//       isLiked,
-//       isDisliked,
-//       book: transformedBook
-//     });
+    return res.status(200).json({
+      isLiked,
+      isDisliked,
+      book: transformedBook
+    });
 
-//   } catch (error) {
-//     console.log("Error we got is this = ", error);
-//     return res.status(500).json({ message: "Server error", error: error.message });
-//   }
-// };
+  } catch (error) {
+    console.log("Error we got is this = ", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 const getBookapp = async (req, res) => {
   try {
