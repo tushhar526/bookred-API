@@ -5,6 +5,7 @@ const { deleteUserProfilePictureById } = require("../utility/deleteFromDrive");
 const uploadToDrive = require("../utility/uploadToDrive");
 const multer = require("multer");
 const fs = require('fs');
+const mongoose = require("mongoose");
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -340,9 +341,9 @@ const AddToCurrentlyReading = async (req, res) => {
 }
 
 const GetCurrentlyReadingBook = async (req, res) => {
-    const userID = req.params;
+    const userID = { _id: new mongoose.Types.ObjectId(req.params.userID) };
     try {
-        const user = User.findOne(userID).
+        const user = await User.findOne({ _id: userID }).
             populate({
                 path: "currentlyReading.book",
                 populate: {
@@ -352,10 +353,13 @@ const GetCurrentlyReadingBook = async (req, res) => {
                 select: "bookname writer image"
             });
 
-        const book = user.currentlyReading.book;
-        const date = user.currentlyReading.completionDate;
+        if (!user || !user.currentlyReading.book) {
+            return res.status(200).json({ message: "No book is currently being read", currentlyReading: null, completionDate: null });
+        }
 
-        return res.status(200).json({ currentlyReading: book, completionDate: date })
+        const CurrentlyReadingBook = user.currentlyReading.book;
+        const date = user.currentlyReading.completionDate;
+        return res.status(200).json({ currentlyReading: CurrentlyReadingBook, completionDate: date })
     }
     catch (error) {
         console.error("Error Occured while getting currently reading book = ", error);

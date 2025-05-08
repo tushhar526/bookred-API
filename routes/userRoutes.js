@@ -15,7 +15,7 @@ router.get('/readbook/:userID', userController.getreadbooks);
 
 router.get('/followedAuthor/:userID', userController.getFollowedAuthor);
 
-router.get("/currentlyReading/userID", userController.GetCurrentlyReadingBook);
+router.get("/currentlyReading/:userID", userController.GetCurrentlyReadingBook);
 
 
 //Put URL

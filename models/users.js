@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
     currentlyReading: {
         book: {
             type: Schema.Types.ObjectId,
-            ref: "books"
+            ref: "Book"
         },
         completionDate: {
             type: Date
