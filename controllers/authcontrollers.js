@@ -7,7 +7,8 @@ const crypto = require('crypto');
 
 const saltRounds = 10;
 
-const algorithm = 'aes-256-cbc'; // Ensure this matches what is used on the frontend
+const algorithm = process.env.ALGORITHM;
+// 'aes-256-cbc'; // Ensure this matches what is used on the frontend
 const secretKey = process.env.SECRET_KEY; // Ensure this is a 32-byte key for AES-256
 
 const decryptPassword = (encryptedPassword, encryptedIV) => {

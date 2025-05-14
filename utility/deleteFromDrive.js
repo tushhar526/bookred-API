@@ -1,6 +1,9 @@
 const { google } = require('googleapis');
 
-const KEYFILEPATH = '../config/service_account_info.json';
+// const KEYFILEPATH = '../config/service_account_info.json';
+const path = require('path');
+const KEYFILEPATH = path.join(__dirname, './config/service_account_info.json');
+
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 
 // Create a Google Auth client
