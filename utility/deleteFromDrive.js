@@ -1,6 +1,7 @@
 const { google } = require('googleapis');
 
-const KEYFILEPATH = './config/service_account_info.json'; // Path to your service account JSON key
+const KEYFILEPATH = path.resolve(__dirname, '../config/service_account_info.json');
+console.log('🔍 Using service account key file at:', KEYFILEPATH); // <-- for debugging
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 
 // Create a Google Auth client
