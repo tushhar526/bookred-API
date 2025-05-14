@@ -129,82 +129,6 @@ const addBook = async (req, res) => {
   }
 };
 
-// const getBookapp = async (req, res) => {
-//   try {
-//     let books;
-
-//     books = await Book.find()
-//       .populate({
-//         path: 'writer.author',
-//         select: 'name role'
-//       })
-//       .lean();
-
-//     const responseBooks = transformBooks(books);
-
-//     responseBooks.forEach(book => delete book.writer);
-
-//     return res.status(200).json(responseBooks);
-//   } catch (error) {
-//     console.error("Error =", error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
-const getBookByIdWithUserStatus = async (req, res) => {
-  const { bookID, userID } = req.body;
-
-  if (!bookID || !userID) {
-    return res.status(400).json({ message: "Both bookID and userID are required" });
-  }
-
-  try {
-    const [user, book] = await Promise.all([
-      User.findById(userID),
-      Book.findById(bookID)
-        .populate({
-          path: 'writer.author', // Populate the author inside writer
-          select: 'name role'    // Select only name and role fields
-        })
-        .lean()
-    ]);
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-    if (!book) return res.status(404).json({ message: "Book not found" });
-
-    const isLiked = user.likedbooks.includes(bookID);
-    const isDisliked = user.dislikedbooks?.includes(bookID) ?? false;
-
-    // Ensure 'dislike' and 'like' fields exist in the book object
-    const likeCount = book.like ?? 0;
-    const dislikeCount = book.dislike ?? 0;
-
-    // Transform the book data to include an 'authors' field like in getBookapp
-    const authors = book.writer?.filter(writer => writer.role === 'Author' && writer.author?.name)
-      .map(writer => ({
-        name: writer.author.name,
-        role: writer.role
-      })) ?? [];
-
-    const transformedBook = {
-      ...book,
-      like: likeCount,
-      dislike: dislikeCount,
-      authors // Add authors to the response
-    };
-
-    return res.status(200).json({
-      isLiked,
-      isDisliked,
-      book: transformedBook
-    });
-
-  } catch (error) {
-    console.log("Error we got is this = ", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
-
 const getBookapp = async (req, res) => {
   try {
     const books = await Book.find()
@@ -234,89 +158,6 @@ const getBookapp = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-// const getBookByIdWithUserStatus = async (req, res) => {
-//   const { bookID, userID } = req.body;
-
-//   if (!bookID || !userID) {
-//     return res.status(400).json({ message: "Both bookID and userID are required" });
-//   }
-
-//   try {
-//     const [user, book] = await Promise.all([
-//       User.findById(userID),
-//       Book.findById(bookID)
-//         .populate({
-//           path: 'writer.author',
-//           select: 'name role'
-//         })
-//         .populate({
-//           path: 'genre',
-//           select: 'name'
-//         }).populate({
-//           path: 'publisher',
-//           select: 'name'
-//         })
-//         .lean()
-//     ]);
-
-//     if (!user) return res.status(404).json({ message: "User not found" });
-//     if (!book) return res.status(404).json({ message: "Book not found" });
-
-//     const isLiked = user.likedbooks.includes(bookID);
-//     const isDisliked = user.dislikedbooks?.includes(bookID) ?? false;
-
-//     const likeCount = book.like ?? 0;
-//     const dislikeCount = book.dislike ?? 0;
-
-//     const authors = book.writer?.filter(writer => writer.role === 'Author' && writer.author?.name)
-//       .map(writer => ({
-//         name: writer.author.name,
-//         role: writer.role
-//       })) ?? [];
-
-//     const translators = book.writer?.filter(writer => writer.role === 'Translator' && writer.author?.name)
-//       .map(writer => ({
-//         name: writer.author.name,
-//         role: writer.role
-//       })) ?? [];
-
-//     const publisher = book.publisher?.map(p => p.name) ?? []
-
-//     const genres = book.genre?.map(g => g.name) ?? [];
-
-//     const { writer, ...bookWithoutWriter } = book;
-
-//     const transformedBook = {
-//       ...bookWithoutWriter,
-//       like: likeCount,
-//       dislike: dislikeCount,
-//       authors,
-//       translators,
-//       publisher: publisher,
-//       genre: genres,
-//     };
-
-
-//     // const transformedBook = {
-//     //   ...book,
-//     //   like: likeCount,
-//     //   dislike: dislikeCount,
-//     //   authors,
-//     //   translators,
-//     //   genre: genres
-//     // };
-
-//     return res.status(200).json({
-//       isLiked,
-//       isDisliked,
-//       book: transformedBook
-//     });
-//   } catch (error) {
-//     console.log("Error we got is this = ", error);
-//     return res.status(500).json({ message: "Server error", error: error.message });
-//   }
-// };
 
 const getBookByIdWithUserStatus = async (req, res) => {
   const { bookID, userID } = req.body;
@@ -665,26 +506,40 @@ const dislikeBook = async (req, res) => {
   }
 };
 
-// const addBookRating = async (req, res) => {
-//     try {
-//         const { bookId, rating } = req.body;  // Assuming bookId and rating come from the request body
-//         const book = await Book.findById(bookId);
+const addBookRating = async (req, res) => {
+  try {
+    const { bookId, rating, userId } = req.body;  // Pass userId manually for now
 
-//         if (!book) {
-//             return res.status(404).send("Book not found");
-//         }
+    const book = await Book.findById(bookId);
+    if (!book) return res.status(404).send("Book not found");
 
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).send("User not found");
 
-//         await book.addRating(rating);
+    await Book.addRating(rating);
 
-//         return res.status(200).json({
-//             message: "Rating added successfully",
-//             averageRating: book.rating.average
-//         });
-//     } catch (err) {
-//         return res.status(500).json({ error: err.message });
-//     }
-// };
+    const ratedIndex = User.ratedBook.findIndex(
+      (entry) => entry.book.toString() === bookId
+    );
+
+    if (ratedIndex >= 0) {
+      user.ratedBook[ratedIndex].rating = rating;
+    } else {
+      user.ratedBook.push({ book: bookId, rating });
+    }
+
+    await User.save();
+
+    return res.status(200).json({
+      message: "Rating added successfully",
+      averageRating: book.rating.average
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 
 module.exports = {
   getAllBooksweb,
@@ -692,6 +547,7 @@ module.exports = {
   getBookapp,
   addBook,
   upload,
+  addBookRating,
   getBookByIdWithUserStatus,
   likeBook,
   addToRreadList,
@@ -701,5 +557,4 @@ module.exports = {
   getRandomBooks,
   getBooksByLike,
   updateBook
-  // addBookRating
 }

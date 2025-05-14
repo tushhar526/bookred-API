@@ -22,15 +22,6 @@ const userSchema = new mongoose.Schema({
             "Please enter a valid email",
         ],
     },
-    phoneNumber: {
-        type: String,
-        unique: true,
-        sparse: true,
-        match: [
-            /^[0-9]{10}$/,
-            "Please enter a valid phone number",
-        ],
-    },
     password: {
         type: String,
         required: [true, "Please enter password"],
@@ -41,12 +32,18 @@ const userSchema = new mongoose.Schema({
         enum: ["User", "Admin"],
         default: "User",
     },
-    resetPasswordToken: {
-        type: String,
-    },
-    resetPasswordExpire: {
-        type: Date,
-    },
+    ratedBook: [
+        {
+            book: {
+                type: Schema.Types.ObjectId,
+                ref: "Book",
+            },
+            rating: {
+                type: Number,
+                default: 0
+            }
+        }
+    ],
     readbooks: [
         {
             type: Schema.Types.ObjectId,
