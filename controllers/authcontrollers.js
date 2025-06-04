@@ -3,24 +3,20 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/users');
 const validateUser = require('../validation/userValidation');
 const crypto = require('crypto');
-// const user = require('../models/users');
 
 const saltRounds = 10;
 
 const algorithm = process.env.ALGORITHM;
-// 'aes-256-cbc'; // Ensure this matches what is used on the frontend
-const secretKey = process.env.SECRET_KEY; // Ensure this is a 32-byte key for AES-256
+const secretKey = process.env.SECRET_STR; 
 
 const decryptPassword = (encryptedPassword, encryptedIV) => {
   try {
-    // Convert base64-encoded IV back to buffer
+
     const ivBuffer = Buffer.from(encryptedIV, 'base64');
 
-    // Clean and decode the encrypted password
     const cleaned = encryptedPassword.replace(/-/g, '+').replace(/_/g, '/');
     const encryptedBuffer = Buffer.from(cleaned, 'base64');
 
-    // Create decipher with correct key and IV
     const decipher = crypto.createDecipheriv(algorithm, Buffer.from(secretKey, 'utf-8'), ivBuffer);
 
     const decrypted = Buffer.concat([
@@ -60,7 +56,6 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Password reset failed" });
     }
 
-    // Hash the password before saving (assuming you have a hash function)
     user.password = decryptedPassword;
 
     await user.save();
@@ -198,10 +193,6 @@ const signinuser = async (req, res) => {
 // login function
 const loginUser = async (req, res) => {
   try {
-    // const validation = validateUser(req.body);
-    // if (!validation.isValid) {
-    //   return res.status(400).json({ message: validation.message });
-    // }
 
     const { loginId, password } = req.body; // loginId can be username, email, or phoneNumber
 
@@ -214,14 +205,10 @@ const loginUser = async (req, res) => {
     }).select('+password'); // Include password field explicitly
     if (!user) {
       console.log("No User Found")
-      return res.status(401).json({ message: 'Invalid username credentials.' });
+      return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    // Check if the password matches
     const passwordMatch = await bcrypt.compare(password, user.password);
-
-    // hashedpassword = await bcrypt.hash(password, 10);
-    // console.log("Sent Password when Hashed = ", hashedpassword);
 
     if (!passwordMatch) {
       console.log("Password Incorrect");
@@ -229,7 +216,7 @@ const loginUser = async (req, res) => {
     }
 
     console.log("User profile picture", user.profilePicture);
-    // Generate JWT token
+
     const token = jwt.sign(
       { userId: user._id, username: user.username, role: user.role, pfp: user.profilePicture, email: user.email },
       process.env.SECRET_STR,

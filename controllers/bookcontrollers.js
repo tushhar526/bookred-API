@@ -170,7 +170,6 @@ const getBookByIdWithUserStatus = async (req, res) => {
     const [user, book] = await Promise.all([
       User.findById(userID).select("likedbooks dislikedbooks bookmarks readbooks"),
       Book.findById(bookID)
-        // .select("-name -image -writer.author") // Exclude fields already received from getBookapp
         .populate({ path: "writer.author", select: "name role image" }) // Include author image
         .populate({ path: "genre", select: "name" })
         .populate({ path: "publisher", select: "_id name logo" }) // Include publisher image

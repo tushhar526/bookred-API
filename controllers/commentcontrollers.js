@@ -1,8 +1,6 @@
 const Comment = require('../models/comments');
 const mongoose = require('mongoose');
 const Book = require('../models/books');
-// const { Message } = require('@mui/icons-material');
-const comments = require('../models/comments');
 
 
 const addComment = async (req, res) => {
