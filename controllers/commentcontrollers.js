@@ -7,7 +7,7 @@ const comments = require('../models/comments');
 
 const addComment = async (req, res) => {
     try {
-        const { bookId } = req.params;
+        const { bookID } = req.params;
         const { userId, comment } = req.body;
 
         // Validate inputs
@@ -19,13 +19,13 @@ const addComment = async (req, res) => {
         // Create a new comment
         const newComment = await Comment.create({
             userId,
-            bookId,
+            bookID,
             comment,
         });
 
         // Update the book with the new comment
         const updatedBook = await Book.findByIdAndUpdate(
-            bookId,
+            bookID,
             { $push: { comments: newComment._id } },
             { new: true }
         );

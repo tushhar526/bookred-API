@@ -508,35 +508,37 @@ const dislikeBook = async (req, res) => {
 
 const addBookRating = async (req, res) => {
   try {
-    const { bookId, rating, userId } = req.body;  // Pass userId manually for now
+    const { bookID } = req.params;
+    const { rating, userId } = req.body;  // Pass userId manually for now
 
-    const book = await Book.findById(bookId);
+    const book = await Book.findById(bookID);
     if (!book) return res.status(404).send("Book not found");
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).send("User not found");
 
-    await Book.addRating(rating);
+    await book.addRating(rating);
 
-    const ratedIndex = User.ratedBook.findIndex(
-      (entry) => entry.book.toString() === bookId
+    const ratedIndex = user.ratedBook.findIndex(
+      (entry) => entry.book.toString() === bookID
     );
 
     if (ratedIndex >= 0) {
       user.ratedBook[ratedIndex].rating = rating;
     } else {
-      user.ratedBook.push({ book: bookId, rating });
+      user.ratedBook.push({ book: bookID, rating });
     }
 
-    await User.save();
+    await user.save();
 
     return res.status(200).json({
       message: "Rating added successfully",
-      averageRating: book.rating.average
+      status: true,
+      averageRating: parseFloat(book.rating.average.toFixed(2)),
     });
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message, averageRating: parseFloat(book.rating.average.toFixed(2)) });
   }
 };
 

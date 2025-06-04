@@ -19,13 +19,15 @@ router.post('/add',
     // booksController.upload.single("image"),
     booksController.addBook);
 
-router.post('/comments/:bookId', commentcontrollers.addComment);
+router.post('/comments/:bookID', commentcontrollers.addComment);
 
 router.post('/bookmark/:bookID',booksController.bookmarkBook);
 
 router.post('/readbook/:bookID',booksController.addToRreadList);
 
 router.post('/status',booksController.getBookByIdWithUserStatus);
+
+router.post('/rating/:bookID',booksController.addBookRating);
 
 //Delete Methods
 router.delete('/:id', booksController.deleteBookById);

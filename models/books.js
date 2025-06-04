@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const author = require("./authors");
 
 const booksSchema = new mongoose.Schema({
-
     bookname: {
         type: String,
         required: true,
@@ -16,12 +15,12 @@ const booksSchema = new mongoose.Schema({
         _id: false,
         author: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Author', // Refers to the Author collection
+            ref: 'Author',
             required: true,
         },
-        role: {  // Define role for author, translator, or any other contributor
+        role: {
             type: String,
-            enum: ['Author', 'Translator'],  // Example roles
+            enum: ['Author', 'Translator'],
             default: 'Author',
         }
     }],
@@ -34,7 +33,7 @@ const booksSchema = new mongoose.Schema({
             type: Number,
             default: 0,
         }
-    },  
+    },
     like: {
         type: Number,
         default: 0,
@@ -57,7 +56,7 @@ const booksSchema = new mongoose.Schema({
         position: {
             type: Number,
         }
-    },            
+    },
     synopsis: {
         type: String,
         required: true,
@@ -85,25 +84,32 @@ const booksSchema = new mongoose.Schema({
         unique: true,
         required: true,
     }
-    
-}
-)
+});
 
+// Add method to handle ratings
 booksSchema.methods.addRating = function (newRating) {
     if (newRating <= 5 && newRating >= 0) {
-        const totalRating = this.rating.average * this.rating.count;  // Get the total from current average
+        const totalRating = this.rating.average * this.rating.count;
         const updatedCount = this.rating.count + 1;
         const newAverage = (totalRating + newRating) / updatedCount;
 
-        // Update the rating
         this.rating.average = newAverage;
         this.rating.count = updatedCount;
 
-        return this.save();  // Save the document after updating
+        return this.save();
     } else {
         throw new Error("Rating must be between 0 and 5");
     }
 };
 
+// 🧠 Fix: Ensure average is always sent as a float to frontend
+booksSchema.set('toJSON', {
+    transform: function (doc, ret) {
+        if (ret.rating && typeof ret.rating.average === 'number') {
+            ret.rating.average = parseFloat(ret.rating.average.toFixed(1));
+        }
+        return ret;
+    }
+});
+
 module.exports = mongoose.model("Book", booksSchema);
-// module.exports = Books;
