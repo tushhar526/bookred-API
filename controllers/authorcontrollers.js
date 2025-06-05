@@ -153,21 +153,21 @@ const getBooksByAuthor = async (req, res) => {
 
 const getRandomAuthor = async (req, res) => {
     try {
-      const count = await Author.countDocuments();
-      const limit = Math.min(count, 10);
-  
-      const randomAuthor = await Author.aggregate([
-        { $sample: { size: limit } },
-        { $project: { _id: 1, name: 1, image: 1 } }
-      ]);
-  
-      res.status(200).json(randomAuthor);
+        const count = await Author.countDocuments();
+        const limit = Math.min(count, 10);
+
+        const randomAuthor = await Author.aggregate([
+            { $sample: { size: limit } },
+            { $project: { _id: 1, name: 1, image: 1 } }
+        ]);
+
+        res.status(200).json(randomAuthor);
     } catch (error) {
-      console.error("Error retrieving random Authors:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
+        console.error("Error retrieving random Authors:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
-  };
-  
+};
+
 
 // const getAuthorapp = async (req, res) => {
 //     try {
@@ -335,11 +335,18 @@ const getAuthorbyid = async (req, res) => {
 
     try {
 
-        const author = await Author.findById(req.params.id);
+        const authorID = req.params.id;
+
+        const author = await Author.findById(authorID);
         if (!author) {
             return res.status(404).json({ message: "Author Not Found" });
         }
-        return res.status(200).json(author)
+
+        const listedbooks = await Book.countDocuments({ "writer.author": authorID });
+        const authorObj = author.toObject();
+        authorObj.listedbooks = listedbooks;
+
+        return res.status(200).json(authorObj);
 
     }
     catch (error) {

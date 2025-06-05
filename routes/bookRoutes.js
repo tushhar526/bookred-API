@@ -31,10 +31,10 @@ router.post('/status', booksController.getBookByIdWithUserStatus);
 router.post('/rating/:bookID', booksController.addBookRating);
 
 //Delete Methods
-router.delete('/:id', booksController.deleteBookById);
+router.delete('/:id',authenticateUser, authorizeRole("Admin"), booksController.deleteBookById);
 
 //Patch Method
-router.patch("/edit/:id", booksController.updateBook);
+router.patch("/edit/:id",authenticateUser, authorizeRole("Admin"), booksController.updateBook);
 
 router.patch('/like/:id', booksController.likeBook);
 
